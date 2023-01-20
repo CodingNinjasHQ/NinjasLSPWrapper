@@ -56,6 +56,12 @@ const language: string = argv.language
 const langServer = languageServers[language]
 let connection = null
 let localConnection = rpcServer.createServerProcess(`${langServer[0]}LSP`, langServer[0], langServer.slice(1));
+setInterval(() => {
+  console.log("CONNECTION VALUE: ", connection)
+  if (connection != null) {
+    logConnectionCount(language, ConnectionStatus.ACTIVE)
+  }
+}, 1000)
 wss.on('connection', (client: ws, request: http.IncomingMessage) => {
   if (!langServer || !langServer.length) {
     console.error('Invalid language server');
@@ -70,7 +76,7 @@ wss.on('connection', (client: ws, request: http.IncomingMessage) => {
   let socket: rpc.IWebSocket = toSocket(client);
   connection = rpcServer.createWebSocketConnection(socket);
   rpcServer.forward(connection, localConnection);
-  logConnectionCount(language, ConnectionStatus.CONNECTED)
+  logConnectionCount(language, ConnectionStatus.INCOMING)
   console.log("Forwarding new client");
   socket.onClose((code) => {
     console.log('Client closed', code);
