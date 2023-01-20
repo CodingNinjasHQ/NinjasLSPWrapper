@@ -60,6 +60,7 @@ setInterval(() => {
   if (connection != null) {
     logConnectionCount(language, ConnectionStatus.ACTIVE)
   }
+  logConnectionCount(language, ConnectionStatus.LIVE)
 }, 1000)
 wss.on('connection', (client: ws, request: http.IncomingMessage) => {
   if (!langServer || !langServer.length) {

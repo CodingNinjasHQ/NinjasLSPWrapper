@@ -3,7 +3,7 @@ import dayjs = require('dayjs');
 import UTC = require('dayjs/plugin/utc');
 import Timezone = require('dayjs/plugin/timezone');
 import AdvancedFormat = require('dayjs/plugin/advancedFormat');
-import { ACTIVE, CONNECTION_STATS, CLOSED, LANGUAGE_SERVER_IN_USE, INCOMING } from './redisData'
+import { ACTIVE, CONNECTION_STATS, CLOSED, LANGUAGE_SERVER_IN_USE, INCOMING, LIVE } from './redisData'
 import { ConnectionStatus } from './redisData';
 
 dayjs.extend(UTC);
@@ -23,5 +23,8 @@ export const logConnectionCount = (language: string, status: ConnectionStatus) =
   }
   if (status === ConnectionStatus.INCOMING) {
     redis.hincrby(redisKey, INCOMING, 1)
+  }
+  if (status === ConnectionStatus.LIVE) {
+    redis.hincrby(redisKey, LIVE, 1)
   }
 }
