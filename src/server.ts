@@ -57,7 +57,6 @@ const langServer = languageServers[language]
 let connection = null
 let localConnection = rpcServer.createServerProcess(`${langServer[0]}LSP`, langServer[0], langServer.slice(1));
 setInterval(() => {
-  console.log("CONNECTION VALUE: ", connection)
   if (connection != null) {
     logConnectionCount(language, ConnectionStatus.ACTIVE)
   }
