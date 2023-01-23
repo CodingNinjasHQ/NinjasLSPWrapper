@@ -61,7 +61,7 @@ setInterval(() => {
     logConnectionCount(language, ConnectionStatus.ACTIVE)
   }
   logConnectionCount(language, ConnectionStatus.LIVE)
-}, 1000)
+}, 60000)
 wss.on('connection', (client: ws, request: http.IncomingMessage) => {
   if (!langServer || !langServer.length) {
     console.error('Invalid language server');
