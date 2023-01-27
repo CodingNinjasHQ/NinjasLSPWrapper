@@ -27,4 +27,6 @@ export const logConnectionCount = (language: string, status: ConnectionStatus) =
   if (status === ConnectionStatus.LIVE) {
     redis.hincrby(redisKey, LIVE, 1)
   }
+  const expiryTimeInSeconds = 60 * 60 * 6;
+  redis.expire(redisKey, expiryTimeInSeconds, 'NX');
 }
