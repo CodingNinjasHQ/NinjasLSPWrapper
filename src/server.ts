@@ -70,6 +70,7 @@ wss.on('connection', (client: ws, request: http.IncomingMessage) => {
     return;
   }
   if (connection != null) {
+    console.log('LANGUAGE SERVER IN USE')
     logConnectionCount(language, ConnectionStatus.LANGUAGE_SERVER_IN_USE)
     client.close();
     return;
