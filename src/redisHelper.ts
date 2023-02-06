@@ -12,17 +12,21 @@ dayjs.extend(AdvancedFormat);
 
 export const logConnectionCount = (language: string, status: ConnectionStatus) => {
   const redisKey = `${CONNECTION_STATS}:${language}:${dayjs().tz('Asia/Kolkata').format('YYYY-MM-DDTHH:mm')}`
+  const totalRedisKey = `${CONNECTION_STATS}:${language}`
   if (status === ConnectionStatus.ACTIVE) {
     redis.hincrby(redisKey, ACTIVE, 1)
   }
   if (status === ConnectionStatus.LANGUAGE_SERVER_IN_USE) {
     redis.hincrby(redisKey, LANGUAGE_SERVER_IN_USE, 1)
+    redis.hincrby(totalRedisKey, LANGUAGE_SERVER_IN_USE, 1)
   }
   if (status === ConnectionStatus.CLOSED) {
     redis.hincrby(redisKey, CLOSED, 1)
+    redis.hincrby(totalRedisKey, CLOSED, 1)
   }
   if (status === ConnectionStatus.INCOMING) {
     redis.hincrby(redisKey, INCOMING, 1)
+    redis.hincrby(totalRedisKey, INCOMING, 1)
   }
   if (status === ConnectionStatus.LIVE) {
     redis.hincrby(redisKey, LIVE, 1)
