@@ -54,36 +54,38 @@ function toSocket(webSocket: ws): rpc.IWebSocket {
 }
 const language: string = argv.language
 const langServer = languageServers[language]
-let connection = null
-let localConnection = rpcServer.createServerProcess(`${langServer[0]}LSP`, langServer[0], langServer.slice(1));
+let connectionCounter = 0
+
 setInterval(() => {
-  console.log("VALID CONNECTION:", connection != null)
-  if (connection != null) {
-    logConnectionCount(language, ConnectionStatus.ACTIVE)
+  console.log("VALID CONNECTION:", connectionCounter)
+  if (connectionCounter > 0) {
+    logConnectionCount(language, ConnectionStatus.ACTIVE, connectionCounter)
   }
   logConnectionCount(language, ConnectionStatus.LIVE)
 }, 60000)
+
 wss.on('connection', (client: ws, request: http.IncomingMessage) => {
   if (!langServer || !langServer.length) {
     console.error('Invalid language server');
     client.close();
     return;
   }
-  if (connection != null) {
+  if (connectionCounter > 2) {
     logConnectionCount(language, ConnectionStatus.LANGUAGE_SERVER_IN_USE)
     client.close();
     return;
   }
-  let socket: rpc.IWebSocket = toSocket(client);
-  connection = rpcServer.createWebSocketConnection(socket);
+  connectionCounter++;
+  const socket: rpc.IWebSocket = toSocket(client);
+  const localConnection = rpcServer.createServerProcess(`${langServer[0]}LSP - ${connectionCounter}`, langServer[0], langServer.slice(1));
+  const connection = rpcServer.createWebSocketConnection(socket);
   rpcServer.forward(connection, localConnection);
   logConnectionCount(language, ConnectionStatus.INCOMING)
-  console.log("Forwarding new client");
+  console.log("Forwarding new client: ", connectionCounter);
   socket.onClose((code) => {
     console.log('Client closed', code);
     logConnectionCount(language, ConnectionStatus.CLOSED)
-    connection = null;
+    connectionCounter--;
     localConnection.dispose();
-    localConnection = rpcServer.createServerProcess(`${langServer[0]}LSP`, langServer[0], langServer.slice(1));
   });
 });
