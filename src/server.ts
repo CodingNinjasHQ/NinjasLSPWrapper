@@ -54,7 +54,7 @@ function toSocket(webSocket: ws): rpc.IWebSocket {
 }
 const language: string = argv.language
 const langServer = languageServers[language]
-let connectionCounter = 0
+let connectionCounter = 1
 
 setInterval(() => {
   console.log("VALID CONNECTION:", connectionCounter)
@@ -75,13 +75,13 @@ wss.on('connection', (client: ws, request: http.IncomingMessage) => {
     client.close();
     return;
   }
-  connectionCounter++;
   const socket: rpc.IWebSocket = toSocket(client);
   const localConnection = rpcServer.createServerProcess(`${langServer[0]}LSP - ${connectionCounter}`, langServer[0], langServer.slice(1));
   const connection = rpcServer.createWebSocketConnection(socket);
   rpcServer.forward(connection, localConnection);
   logConnectionCount(language, ConnectionStatus.INCOMING)
   console.log("Forwarding new client: ", connectionCounter);
+  connectionCounter++;
   socket.onClose((code) => {
     console.log('Client closed', code);
     logConnectionCount(language, ConnectionStatus.CLOSED)
