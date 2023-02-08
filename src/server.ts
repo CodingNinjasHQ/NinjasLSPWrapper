@@ -84,7 +84,7 @@ wss.on('connection', (client: ws, request: http.IncomingMessage) => {
   console.log("Forwarding new client: ", connectionCounter);
   connectionCounter++;
   socket.onClose((code) => {
-    console.log('Client closed', code);
+    console.log('Client closed: ', code, connectionCounter);
     logConnectionCount(language, ConnectionStatus.CLOSED)
     connectionCounter--;
     localConnection.dispose();
