@@ -57,9 +57,10 @@ const langServer = languageServers[language]
 let connectionCounter = 1
 
 setInterval(() => {
-  console.log("VALID CONNECTION:", connectionCounter)
-  if (connectionCounter > 0) {
-    logConnectionCount(language, ConnectionStatus.ACTIVE, connectionCounter)
+  const totalConnection = connectionCounter - 1
+  console.log("VALID CONNECTION:", totalConnection)
+  if (totalConnection > 0) {
+    logConnectionCount(language, ConnectionStatus.ACTIVE, totalConnection)
   }
   logConnectionCount(language, ConnectionStatus.LIVE)
 }, 60000)
