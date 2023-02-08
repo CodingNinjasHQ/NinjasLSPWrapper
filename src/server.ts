@@ -71,7 +71,7 @@ wss.on('connection', (client: ws, request: http.IncomingMessage) => {
     client.close();
     return;
   }
-  if (connectionCounter > 2) {
+  if (connectionCounter > 5) {
     logConnectionCount(language, ConnectionStatus.LANGUAGE_SERVER_IN_USE)
     client.close();
     return;
@@ -84,9 +84,9 @@ wss.on('connection', (client: ws, request: http.IncomingMessage) => {
   console.log("Forwarding new client: ", connectionCounter);
   connectionCounter++;
   socket.onClose((code) => {
+    connectionCounter--;
     console.log('Client closed: ', code, connectionCounter);
     logConnectionCount(language, ConnectionStatus.CLOSED)
-    connectionCounter--;
     localConnection.dispose();
   });
 });
