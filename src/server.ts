@@ -71,7 +71,7 @@ wss.on('connection', (client: ws, request: http.IncomingMessage) => {
     client.close();
     return;
   }
-  if (connectionCounter > 5) {
+  if (connectionCounter > 6) {
     logConnectionCount(language, ConnectionStatus.LANGUAGE_SERVER_IN_USE)
     client.close();
     return;
