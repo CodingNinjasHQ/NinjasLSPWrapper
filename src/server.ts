@@ -57,10 +57,11 @@ const processCount: number = argv.count || 2
 const langServer = languageServers[language]
 let connectionCounter = 1
 let processCollection = []
+let processInUse = [];
 for (var i = 0; i < processCount; i++) {
   processCollection.push(rpcServer.createServerProcess(`${langServer[0]}LSP - ${i}`, langServer[0], langServer.slice(1)))
+  processInUse.push(false)
 }
-
 setInterval(() => {
   const activeConnections = connectionCounter - 1;
   console.log("VALID CONNECTION:", activeConnections)
@@ -75,15 +76,16 @@ wss.on('connection', (client: ws, request: http.IncomingMessage) => {
     client.close();
     return;
   }
-  if (connectionCounter > processCount) {
+  if (connectionCounter > processCount || processInUse.indexOf(false) === -1) {
     logConnectionCount(language, ConnectionStatus.LANGUAGE_SERVER_IN_USE)
     client.close();
     return;
   }
-  const connectionId = connectionCounter - 1
+  const connectionId = processInUse.indexOf(false)
   const socket: rpc.IWebSocket = toSocket(client);
   const localConnection = processCollection[connectionId]
   const connection = rpcServer.createWebSocketConnection(socket);
+  processInUse[connectionId] = true
   rpcServer.forward(connection, localConnection);
   logConnectionCount(language, ConnectionStatus.INCOMING)
   console.log("Forwarding new client: ", connectionId);
@@ -92,5 +94,6 @@ wss.on('connection', (client: ws, request: http.IncomingMessage) => {
     connectionCounter--;
     console.log('Client closed: ', code, connectionId);
     logConnectionCount(language, ConnectionStatus.CLOSED)
+    processInUse[connectionId] = false
   });
 });
