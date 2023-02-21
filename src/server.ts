@@ -92,7 +92,5 @@ wss.on('connection', (client: ws, request: http.IncomingMessage) => {
     connectionCounter--;
     console.log('Client closed: ', code, connectionId);
     logConnectionCount(language, ConnectionStatus.CLOSED)
-    localConnection.dispose();
-    processCollection[connectionId] = rpcServer.createServerProcess(`${langServer[0]}LSP - ${connectionId}`, langServer[0], langServer.slice(1))
   });
 });
