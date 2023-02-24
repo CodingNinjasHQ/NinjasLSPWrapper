@@ -56,12 +56,7 @@ const language: string = argv.language
 const processCount: number = argv.count || 2
 const langServer = languageServers[language]
 let connectionCounter = 1
-let processCollection = []
-let processInUse = [];
-for (var i = 0; i < processCount; i++) {
-  processCollection.push(rpcServer.createServerProcess(`${langServer[0]}LSP - ${i}`, langServer[0], langServer.slice(1)))
-  processInUse.push(false)
-}
+
 setInterval(() => {
   const activeConnections = connectionCounter - 1;
   console.log("VALID CONNECTION:", activeConnections)
@@ -70,30 +65,33 @@ setInterval(() => {
   }
   logConnectionCount(language, ConnectionStatus.LIVE, processCount)
 }, 60000)
+
 wss.on('connection', (client: ws, request: http.IncomingMessage) => {
   if (!langServer || !langServer.length) {
     console.error('Invalid language server');
     client.close();
     return;
   }
-  if (connectionCounter > processCount || processInUse.indexOf(false) === -1) {
+  if (connectionCounter > processCount) {
     logConnectionCount(language, ConnectionStatus.LANGUAGE_SERVER_IN_USE)
     client.close();
     return;
   }
-  const connectionId = processInUse.indexOf(false)
   const socket: rpc.IWebSocket = toSocket(client);
-  const localConnection = processCollection[connectionId]
+  const processId = Math.round(Math.random() * 1000)
+  const localConnection = rpcServer.createServerProcess(`${langServer[0]}LSP - ${processId}`, langServer[0], langServer.slice(1))
   const connection = rpcServer.createWebSocketConnection(socket);
-  processInUse[connectionId] = true
   rpcServer.forward(connection, localConnection);
+
   logConnectionCount(language, ConnectionStatus.INCOMING)
-  console.log("Forwarding new client: ", connectionId);
+  console.log("Forwarding new client: ", connectionCounter);
   connectionCounter++;
+
   socket.onClose((code) => {
-    connectionCounter--;
-    console.log('Client closed: ', code, connectionId);
+    localConnection.dispose()
+
+    console.log('Client closed: ', code, connectionCounter);
     logConnectionCount(language, ConnectionStatus.CLOSED)
-    processInUse[connectionId] = false
+    connectionCounter--;
   });
 });
